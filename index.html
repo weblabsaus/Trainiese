@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Trainer: Learning Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <style>
+        .chat-container {
+            height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold mb-6 text-center">AI Trainer: Learning Game</h1>
+        
+        <div class="chat-container mb-4 p-4 bg-gray-200 rounded">
+            <div id="chat-log"></div>
+        </div>
+        
+        <div class="mb-4">
+            <input type="text" id="user-input" class="w-full p-2 border rounded" placeholder="Chat with the AI...">
+            <button onclick="sendMessage()" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+        </div>
+        
+        <div class="mb-4">
+            <textarea id="training-input" class="w-full p-2 border rounded" rows="3" placeholder="Train the AI with words or sentences..."></textarea>
+            <button onclick="trainAI()" class="mt-2 bg-green-500 text-white px-4 py-2 rounded">Train AI</button>
+        </div>
+    </div>
+
+    <script>
+        const chatLog = document.getElementById('chat-log');
+        const userInput = document.getElementById('user-input');
+        const trainingInput = document.getElementById('training-input');
+        
+        const API_URL = 'http://localhost:3000';
+
+        function addMessage(sender, message) {
+            const messageElement = document.createElement('p');
+            messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatLog.appendChild(messageElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage('You', message);
+                userInput.value = '';
+
+                try {
+                    const response = await fetch(`${API_URL}/chat`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message }),
+                    });
+                    const data = await response.json();
+                    addMessage('AI', data.response);
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    addMessage('System', 'An error occurred while communicating with the AI.');
+                }
+            }
+        }
+
+        async function trainAI() {
+            const input = trainingInput.value.trim();
+            if (input) {
+                try {
+                    const response = await fetch(`${API_URL}/train`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ input }),
+                    });
+                    const data = await response.json();
+                    addMessage('System', data.message);
+                    trainingInput.value = '';
+                } catch (error) {
+                    console.error('Error training AI:', error);
+                    addMessage('System', 'An error occurred while training the AI.');
+                }
+            }
+        }
+
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        trainingInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                trainAI();
+            }
+        });
+    </script>
+</body>
+</html>
