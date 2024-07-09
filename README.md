@@ -3,7 +3,7 @@ Setup:
 
 
 
-* Save the backend code as AITrainerServer.js.
+* `git clone https://github.com/weblabsaus/Trainiese`
 * Install Node.js if you haven't already.
 * `cd Trainiese`
 * Run `npm init -y` to create a package.json file.
